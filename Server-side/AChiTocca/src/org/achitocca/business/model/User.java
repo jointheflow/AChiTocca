@@ -6,9 +6,13 @@ public class User {
 	 * positive value= means user will do the turn n times more*/
 	private int turnWeight;
 	
+	private String externalUserId;
+	
 	public String getUserId() {
 		return userId;
 	}
+	
+	
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
@@ -17,6 +21,18 @@ public class User {
 	}
 	public void setTurnWeight(int turnWeight) {
 		this.turnWeight = turnWeight;
+	}
+
+
+	public String getExternalUserId() {
+		return externalUserId;
+	}
+
+
+	public void setExternalUserId(String externalUserId) {
+		this.externalUserId = externalUserId;
 	} 
+	
+	
 
 }

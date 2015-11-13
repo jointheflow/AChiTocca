@@ -21,8 +21,7 @@ import org.junit.Test;
 import org.mortbay.log.Log;
 
 public class TurnManagerTest {
-	ArrayList<User> testUsers1 = new ArrayList<User>();
-	TurnDefinition testTurnDef1  = new TurnDefinition();
+	
 	ArrayList<User> testUsers2 = new ArrayList<User>();
 	TurnDefinition testTurnDef2  = new TurnDefinition();
 	ArrayList<User> testUsers3 = new ArrayList<User>();
@@ -42,26 +41,22 @@ public class TurnManagerTest {
 	public void setUp() throws Exception {
 		
 		User u1= new User();
-		u1.setUserId("u1");
+		u1.setExternalUserId("u1");
 		u1.setTurnWeight(1);
 		
 		User u2= new User();
-		u2.setUserId("u2");
+		u2.setExternalUserId("u2");
 		u2.setTurnWeight(1);
 		
 		User u3= new User();
-		u3.setUserId("u3");
+		u3.setExternalUserId("u3");
 		u3.setTurnWeight(1);
 		
-		testUsers1.add(u1);
-		testUsers1.add(u2);
-		testUsers1.add(u3);
+		testUsers3.add(u1);
+		testUsers3.add(u2);
+		testUsers3.add(u3);
 		
-		CircularList daysOfWeeks1 = new CircularList();
-		daysOfWeeks1.add((short)1);
-		daysOfWeeks1.add((short)2);
 		
-		testTurnDef1.setDaysOfWeek(daysOfWeeks1);
 		
 		
 		testUsers2.add(u1);
@@ -74,26 +69,15 @@ public class TurnManagerTest {
 		testTurnDef3.setDaysOfWeek(daysOfWeeks2);
 		
 		User u4 = new User();
-		u4.setUserId("u4");
+		u4.setExternalUserId("u4");
 		u4.setTurnWeight(2);
 		
 		
 		User u5 = new User();
-		u5.setUserId("u5");
+		u5.setExternalUserId("u5");
 		u5.setTurnWeight(-2);
+			
 		
-		
-		testUsers3.add(u4);
-		testUsers3.add(u5);
-		
-		
-		CircularList daysOfWeeks5 = new CircularList();
-		daysOfWeeks5.add((short)1);
-		daysOfWeeks5.add((short)2);
-		daysOfWeeks5.add((short)3);
-		daysOfWeeks5.add((short)4);
-		daysOfWeeks5.add((short)5);
-		testTurnDef5.setDaysOfWeek(daysOfWeeks5);
 		testUsers5.add(u1);
 		testUsers5.add(u2);
 		testUsers5.add(u3);
@@ -106,41 +90,50 @@ public class TurnManagerTest {
 	}
 
 	@Test
-	public void test3u2d() throws ParseException {
-		TurnFactory.turnCreate("g1", new Date(), testUsers1, testTurnDef1, 0);
+	public void test3User() throws ParseException {
+		TurnFactory.turnCreate("g1", testUsers3);
 		
 	}
 	
 	@Test
-	public void test3u3d() throws ParseException {
-		TurnFactory.turnCreate("g1", new Date(), testUsers1, testTurnDef3, 0);
+	public void test5UserWithMinus() throws ParseException {
+		TurnFactory.turnCreate("g1", testUsers5);
 		
-	}
-	@Test
-	public void test2u3d() throws ParseException {
-		TurnFactory.turnCreate("g1", new Date(), testUsers2, testTurnDef3, 0);
-		TurnFactory.turnCreate("g1", new Date(), testUsers2, testTurnDef3, 1);
-		TurnFactory.turnCreate("g1", new Date(), testUsers2, testTurnDef3, 2);
 	}
 	
-	@Test
-	public void test2u2dNegativePositive() throws ParseException {
-		TurnFactory.turnCreate("g1", new Date(), testUsers3, testTurnDef1, 0);
-		TurnFactory.turnCreate("g1", new Date(), testUsers3, testTurnDef3, 0);
-		
-	}
 	
 	@Test
 	public void testaChiTocca() throws ParseException {
-		DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-		String dateString = "12-11-2015";
-		Date dateObject = sdf.parse(dateString);
+		System.out.println("Test a chi tocca!");		
 		
-		Date Date16_11_2015 = sdf.parse("16-11-2015");
+		Turn aTurn = TurnFactory.turnCreate("g1", testUsers5);
+		String aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
+		System.out.println("Accetto il turno");
+		aTurn = TurnFactory.doNext(aTurn,testUsers5);
 		
-		Turn aTurn = TurnFactory.turnCreate("g1", dateObject, testUsers5, testTurnDef5, 0);
-		String aChiTocca = TurnFactory.aChiTocca(Date16_11_2015, aTurn);
-		System.out.println(aChiTocca);
+		aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
+		System.out.println("Accetto il turno");
+		aTurn = TurnFactory.doNext(aTurn,testUsers5);
+		
+		aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
+		System.out.println("Accetto il turno");
+		aTurn = TurnFactory.doNext(aTurn,testUsers5);
+		
+		aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
+		System.out.println("Accetto il turno");
+		aTurn = TurnFactory.doNext(aTurn,testUsers5);
+		
+		aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
+		System.out.println("Accetto il turno");
+		aTurn = TurnFactory.doNext(aTurn,testUsers5);
+		
+		aChiTocca = TurnFactory.aChiTocca(aTurn);
+		System.out.println("Tocca a: "+ aChiTocca);
 	}
 	
 

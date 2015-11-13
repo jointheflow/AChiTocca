@@ -1,7 +1,6 @@
 package org.achitocca.business;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,7 +10,6 @@ import java.util.logging.Logger;
 
 import org.achitocca.business.model.ScheduledDay;
 import org.achitocca.business.model.Turn;
-import org.achitocca.business.model.TurnDefinition;
 import org.achitocca.business.model.User;
 
 
@@ -20,38 +18,27 @@ public class TurnFactory {
 	private static final Logger log = Logger.getLogger(TurnFactory.class.getName());
 	
 	/*Creates a turn and persists it. Removes old turn if exists*/
-	public static Turn turnCreate(String groupId, Date startDate, ArrayList<User> users, TurnDefinition defTurn, int startDayIterator) throws ParseException {
+	public static Turn turnCreate(String groupId, ArrayList<User> users) throws ParseException {
 		/*retrieves users and turn definition*/
 		
 		Turn turn= new Turn();
-		ArrayList<ScheduledDay> sDays = new ArrayList<ScheduledDay>();
+		ArrayList<String> sUsers = new ArrayList<String>();
 		
-		Iterator<Short> dayItr = defTurn.getDaysOfWeek().iteratorFrom(startDayIterator);
+		
 		Iterator<User> usrItr = users.iterator();
-		log.info("Turn creation start for group "+groupId+" users with size:  "+users.size()+" startDate:"+startDate);
+		log.info("Turn creation start for group "+groupId+" users with size:  "+users.size());
 		
 		while (usrItr.hasNext()) {
 			
 			User currentUser = (User)usrItr.next();
-			log.info("User:"+currentUser.getUserId());
+			log.info("User:"+currentUser.getExternalUserId());
 			log.info("User weight:"+currentUser.getTurnWeight());
 			
 			int nextTurnOccurrence = currentUser.getTurnWeight();
 			
 			for (int i=0; i< nextTurnOccurrence; i++) {
-				ScheduledDay sDay = new ScheduledDay();
-				Short nextDay = (Short)(dayItr.next());
-				log.info("Next day of week: "+nextDay);
-				sDay.setDayOfWeek(nextDay);
-				
-				Date nextComputedDate = nextDateCompute(startDate, nextDay);
-				sDay.setDayDate(nextComputedDate);
-				//now, the start date became the last computedDate 
-				startDate = nextComputedDate;
-				
-				sDay.setUserId(currentUser.getUserId());
 								
-				sDays.add(sDay);
+				sUsers.add(currentUser.getExternalUserId());
 				
 			}
 			
@@ -64,14 +51,16 @@ public class TurnFactory {
 			
 		}
 		turn.setGroupId(groupId);
-		turn.setScheduledDays(sDays);
+		turn.setNextUser(0);
+		turn.setScheduledUsers(sUsers);
 		String msgTurn= new String();
-		SimpleDateFormat sdf = new SimpleDateFormat("(E dd/MM/yyyy)");
-		for (int j=0; j<turn.getScheduledDays().size(); j++) {
-			msgTurn = msgTurn + turn.getScheduledDays().get(j).getUserId()+"-"
-								+turn.getScheduledDays().get(j).getDayOfWeek()+"-"
-								+sdf.format(turn.getScheduledDays().get(j).getDayDate())+", ";
+		
+		for (int j=0; j<turn.getScheduledUsers().size(); j++) {
+			msgTurn = msgTurn + turn.getScheduledUsers().get(j)+", ";
 		}
+		
+		msgTurn = msgTurn + "nextUser is:"+ turn.getNextUser();
+		
 		log.info("Turn created for group "+groupId+" as: " + msgTurn);
 		log.info("Turn creation end");
 		return turn;
@@ -89,25 +78,29 @@ public class TurnFactory {
 		
 	}
 	/*Return the users id who is in turn for the aDate or null if not exixst*/
-	public static String aChiTocca(Date aDate, Turn aTurn) {
+	public static String aChiTocca(Turn aTurn) {
+		if (aTurn.getScheduledUsers()!=null)				
+			return aTurn.getScheduledUsers().get(aTurn.getNextUser());
+		else
+			return null;
 		
-		//get the day of week of the date
-		Calendar c = Calendar.getInstance();
-		c.setTime(aDate);
-		//get the dayOfWeek from currentDate
-		int aDateDayOfWeek= c.get(Calendar.DAY_OF_WEEK);
+	}
+	
+	/*Move ahead to the next user*/
+	public static Turn doNext(Turn aTurn, ArrayList<User> users) throws ParseException {
+		int nextUser = aTurn.getNextUser();
+		//if nextuser index can increment (not reach the last element)
+		//increment the index and return the same turn
+		if (aTurn.getNextUser() < aTurn.getScheduledUsers().size()-1) {
+			nextUser++;
+			aTurn.setNextUser(nextUser);
+			return aTurn;
 		
-		//iterate over scheduled day until a schedueled day with date and dayofweekis found
-		Iterator<ScheduledDay> schItr = aTurn.getScheduledDays().iterator();
-		while (schItr.hasNext()) {
-			ScheduledDay sDay = (ScheduledDay)schItr.next();
-			if ( (sDay.getDayOfWeek()==aDateDayOfWeek) &&
-				 removeTime(sDay.getDayDate()).equals(removeTime(aDate))
-				) return sDay.getUserId();
-				 
+		//create a new turn
+		}else {
+			return turnCreate(aTurn.getGroupId(), users);
+			
 		}
-		
-		return null;
 		
 	}
 	
