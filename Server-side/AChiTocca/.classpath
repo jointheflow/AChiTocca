@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="ext/lib/restlet-gae-edition/org.restlet.ext.servlet.jar"/>
 	<classpathentry kind="lib" path="ext/lib/restlet-gae-edition/org.restlet.jar"/>
 	<classpathentry kind="lib" path="ext/lib/Junit-gae-eidition/appengine-testing-1.9.25.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (1)"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
