@@ -1,14 +1,60 @@
 package org.achitocca.business.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Group {
 	private String groupId;
 	private String externalGroupId;
-	private ArrayList<User> users;
 	private User admin;
-	private TurnDefinition turnDef;
-	private Turn currentTurn;
+	private ArrayList<User> users = new ArrayList<User>();
+	
+	private ArrayList<String> turn = new ArrayList<String>();
+	private int nextUser = 0;
+	
+	
+	
+	public ArrayList<String> getTurn() {
+		return turn;
+	}
+
+
+	public void setTurn(ArrayList<String> turn) {
+		this.turn = turn;
+	}
+
+
+	public int getNextUser() {
+		return nextUser;
+	}
+
+
+	public void setNextUser(int nextUser) {
+		this.nextUser = nextUser;
+	}
+
+
+	//check if external user belongs to the group
+	public boolean userBelongToGroup(String externalUserId) {
+		Iterator<User> usrItr = users.iterator();
+		while(usrItr.hasNext()) {
+			if (usrItr.next().getExternalUserId().equals(externalUserId)) return true;
+			
+		}
+		return false;
+		
+	}
+	
+	
+	//add a user only if he is not a member
+	public void addUser(User u) {
+		
+		if (!userBelongToGroup(u.getExternalUserId())) {
+			users.add(u);
+		}
+			
+		
+	}
 	public String getGroupId() {
 		return groupId;
 	}
@@ -33,18 +79,7 @@ public class Group {
 	public void setAdmin(User admin) {
 		this.admin = admin;
 	}
-	public TurnDefinition getTurnDef() {
-		return turnDef;
-	}
-	public void setTurnDef(TurnDefinition turnDef) {
-		this.turnDef = turnDef;
-	}
-	public Turn getCurrentTurn() {
-		return currentTurn;
-	}
-	public void setCurrentTurn(Turn currentTurn) {
-		this.currentTurn = currentTurn;
-	}
+	
 	
 	
 	

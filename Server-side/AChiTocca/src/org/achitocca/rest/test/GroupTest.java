@@ -19,6 +19,7 @@ import org.restlet.ext.json.JsonRepresentation;
 public class GroupTest {
 	private String createGroupRequest = "http://localhost:8888/app/achitocca/group/create";
 	private String getGroupsRequest = "http://localhost:8888/app/achitocca/group/getgroups";
+	private String addUsersRequest = "http://localhost:8888/app/achitocca/group/addusers";
 	
 	@Before
 	public void setUp() throws Exception {
@@ -47,6 +48,25 @@ public class GroupTest {
 		JSONObject jsonobj_prov = new JsonRepresentation(providerResponse.getEntityAsText()).getJsonObject();
 		
 		System.out.println(jsonobj_prov.toString());
+		JSONObject json_detail = jsonobj_prov.getJSONObject("detail");
+		String groupId = json_detail.getString("groupId");
+		
+		//add some users
+		providerRequest = new Request(Method.POST, addUsersRequest);
+		fParam_prov = new Form();
+		fParam_prov.add("p_group_id",groupId);
+		fParam_prov.add("p_external_user_id", "externalAdminId");
+		fParam_prov.add("p_users", "extuser1, extuser2, extuser3");
+		fParam_prov.add("p_fb_token", "fbtoken");
+		
+		providerRequest.setEntity(fParam_prov.getWebRepresentation());
+		
+		providerResponse = providerClient.handle(providerRequest);
+		System.out.println(providerResponse);		
+		jsonobj_prov = new JsonRepresentation(providerResponse.getEntityAsText()).getJsonObject();
+		
+		System.out.println(jsonobj_prov.toString());
+		
 		//fail("Not yet implemented");
 	}
 	

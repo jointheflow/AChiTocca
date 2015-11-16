@@ -3,10 +3,8 @@ package org.achitocca.rest.resource;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
-
-
 
 
 
@@ -18,7 +16,6 @@ import java.util.logging.Logger;
 
 import org.achitocca.business.AChiToccaManager;
 import org.achitocca.business.model.Group;
-import org.achitocca.business.model.User;
 import org.achitocca.dto.FactoryDto;
 import org.achitocca.dto.GroupDto;
 import org.achitocca.dto.MessageDto;
@@ -31,37 +28,44 @@ import org.restlet.ext.json.*;
 
 
 
-public class doCreateGroupResource<K>  extends ServerResource {
-	private static final Logger log = Logger.getLogger(doCreateGroupResource.class.getName());
+public class doAddUsersToGroupResource<K>  extends ServerResource {
+	private static final Logger log = Logger.getLogger(doAddUsersToGroupResource.class.getName());
 	
 	
-		/*Create a new group*/
+		/*Add users to group*/
 		@Post
-		public Representation doCreateGroup(Representation entity){
+		public Representation doAddUsersToGroup(Representation entity){
 			
 			//create json response
 			JsonRepresentation representation = null;
 			try {
-				log.info("start POST doCreateGroup() doCreateGroupResource");
+				log.info("start POST doAddUsersToGroup() doAddUsersToGroupResource");
 				
 				Form form = new Form(entity);
 				for (Parameter parameter : form) {
 			        	log.info("parameter " + parameter.getName());
 			   		  	log.info("/" + parameter.getValue());
 			        }	
-				String p_external_group_id = form.getFirstValue("p_external_group_id");
-				String p_external_admin_id = form.getFirstValue("p_external_admin_id");
-				String p_name = form.getFirstValue("p_name");
+				String p_group_id = form.getFirstValue("p_group_id");
+				String p_external_user_id = form.getFirstValue("p_external_user_id");
 				String p_fb_token = form.getFirstValue("p_fb_token");
-			      
-				Group group = AChiToccaManager.doCreateGroup(p_external_group_id, p_external_admin_id, p_name, p_fb_token, null);
+				String p_users = form.getFirstValue("p_users");
+				
+			    //get users from parameter and create arrayList
+				StringTokenizer st = new StringTokenizer(p_users,",");
+				ArrayList<String> users = new ArrayList<String>();
+				while (st.hasMoreTokens()){
+					users.add(st.nextToken());
+					
+				}
+				Group group = AChiToccaManager.doAddUsersToGroup(p_group_id, p_external_user_id, users, p_fb_token);
+				
+				GroupDto groupDto = FactoryDto.groupDtoFromGroup(group);
 				
 				MessageDto msgDto = new MessageDto();
-				GroupDto groupDto = FactoryDto.groupDtoFromGroup(group);
-							
-				msgDto.setDetail(groupDto);
 				msgDto.code=0;
-				msgDto.result="doCreateGroup completed!";
+				msgDto.result="doAddUsersToGroup completed!";
+				msgDto.setDetail(groupDto);
 				
 				
 				representation= new JsonRepresentation(msgDto);
@@ -116,7 +120,7 @@ public class doCreateGroupResource<K>  extends ServerResource {
 			}
 			
 			finally {
-				log.info("end POST doCreateGroup() doCreateGroupResource");
+				log.info("end POST doAddUsersToGroup() doAddUsersToGroupResource");
 				
 			}
 			

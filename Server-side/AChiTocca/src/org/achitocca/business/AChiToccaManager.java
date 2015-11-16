@@ -44,16 +44,23 @@ public class AChiToccaManager {
 		return AChiToccaDAO.getGroupOfUser(externalUserId);
 	}
 	
-	/*create a new group*/
-	public static void doCreateGroup(String externalGroupId, String externalUserId, String name, String fbToken, TurnDefinition turnDef) throws DAOException{
+	/*create a new group and return idkey of group*/
+	public static Group doCreateGroup(String externalGroupId, String externalUserId, String name, String fbToken, TurnDefinition turnDef) throws DAOException{
 		//TODO: check token vs externalUserId (admin)
 		
-		AChiToccaDAO.addGroup(externalGroupId, name, externalUserId);
+		Group group = AChiToccaDAO.createGroup(externalGroupId, name, externalUserId);
+		
+		
+		return group;
 	} 
 	
 	/*Add users to group*/
-	public static void doAddUsersToGroup(String extrenalGroupId, String userId, ArrayList<String> users, String fbToken) {
+	public static Group doAddUsersToGroup(String groupId, String externalUserId, ArrayList<String> users, String fbToken) throws DAOException {
+		//TODO: check token vs externalUserId
 		
+		Group group = AChiToccaDAO.addUsersToGroup(groupId, externalUserId, users);
+		
+		return group;
 		
 	}
 	/*get the next user scheduled for the group*/

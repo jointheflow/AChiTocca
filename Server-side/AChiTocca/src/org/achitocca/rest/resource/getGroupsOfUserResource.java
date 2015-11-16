@@ -45,8 +45,8 @@ public class getGroupsOfUserResource<K>  extends ServerResource {
 					GroupDto gDto = new GroupDto();
 					gDto.externalGroupId= g.getExternalGroupId();
 					gDto.groupId = g.getGroupId();
-					gDto.nextUser = g.getCurrentTurn().getNextUser();
-					gDto.turn = g.getCurrentTurn().getScheduledUsers();
+					gDto.nextUser = g.getNextUser();
+					gDto.turn = g.getTurn();
 					
 					dtoGroupList.add(gDto);
 				}

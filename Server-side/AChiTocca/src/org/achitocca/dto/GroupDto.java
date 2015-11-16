@@ -1,15 +1,23 @@
 package org.achitocca.dto;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 
 public class GroupDto {
-	public String groupId="fake-groupId";
-	public String externalGroupId="fake-externalGroupId";
-	public ArrayList<String> usersId = new ArrayList<>(Arrays.asList("idUser1", "idUser2", "idUser3"));
-	public ArrayList<String> turn = new ArrayList<>(Arrays.asList("idUser1", "idUser2", "idUser3"));
+	public String groupId;
+	public String externalGroupId;
+	public ArrayList<String> users = new ArrayList<String>();
+	public ArrayList<String> turn = new ArrayList<String>();
 	public int nextUser =0;
+	public String externalAdminId;
 	
+	
+	public String getExternalAdminId() {
+		return externalAdminId;
+	}
+	public void setExternalAdminId(String externalAdminId) {
+		this.externalAdminId = externalAdminId;
+	}
 	public String getGroupId() {
 		return groupId;
 	}
@@ -22,11 +30,11 @@ public class GroupDto {
 	public void setExternalGroupId(String externalGroupId) {
 		this.externalGroupId = externalGroupId;
 	}
-	public ArrayList<String> getUsersId() {
-		return usersId;
+	public ArrayList<String> getUsers() {
+		return users;
 	}
 	public void setUsersId(ArrayList<String> usersId) {
-		this.usersId = usersId;
+		this.users = usersId;
 	}
 	public ArrayList<String> getTurn() {
 		return turn;
