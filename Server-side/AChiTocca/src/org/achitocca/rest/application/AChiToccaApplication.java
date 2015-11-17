@@ -28,6 +28,8 @@ public class AChiToccaApplication extends Application {
         router.attach("/achitocca/group/getgroups", org.achitocca.rest.resource.getGroupsOfUserResource.class);
         router.attach("/achitocca/group/create", org.achitocca.rest.resource.doCreateGroupResource.class);
         router.attach("/achitocca/group/addusers", org.achitocca.rest.resource.doAddUsersToGroupResource.class);
+        router.attach("/achitocca/group/achitocca", org.achitocca.rest.resource.aChiToccaResource.class);
+        router.attach("/achitocca/group/nextuser", org.achitocca.rest.resource.doNextUserResource.class);
         /*
         router.attach("/freediver/get", org.gianluca.logbook.rest.resource.FreediverGetResource.class);
         router.attach("/freediver/divesession/add", org.gianluca.logbook.rest.resource.DiveSessionAddResource.class);

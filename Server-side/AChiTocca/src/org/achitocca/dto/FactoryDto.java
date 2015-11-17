@@ -13,6 +13,7 @@ public class FactoryDto {
 		groupDto.setExternalGroupId(group.getExternalGroupId());
 		groupDto.setGroupId(group.getGroupId());
 		groupDto.setExternalAdminId(group.getAdmin().getExternalUserId());
+		groupDto.setTurn(group.getTurn());
 		ArrayList<String> usersDto = new ArrayList<String>();
 		Iterator<User> usrItr = group.getUsers().iterator();
 		while (usrItr.hasNext()) {

@@ -1,7 +1,7 @@
 package org.achitocca.rest.resource;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.achitocca.business.AChiToccaManager;
@@ -11,47 +11,44 @@ import org.achitocca.dto.GroupDto;
 import org.achitocca.dto.MessageDto;
 import org.restlet.representation.Representation;
 import org.restlet.resource.*; 
+import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.data.Status;
 import org.restlet.ext.json.*;
 
-public class getGroupsOfUserResource<K>  extends ServerResource {
-	private static final Logger log = Logger.getLogger(getGroupsOfUserResource.class.getName());
+
+
+public class doNextUserResource<K>  extends ServerResource {
+	private static final Logger log = Logger.getLogger(doNextUserResource.class.getName());
 	
 	
-		/*Get all groups of the user* 
-		 */
-		@Get("json")
-		public Representation getGroupsOfUser(){
+		/*go ahead to the next user*/
+		@Post
+		public Representation doNextUser(Representation entity){
+			
 			//create json response
 			JsonRepresentation representation = null;
 			try {
-				log.info("start GET getGroupsOfUser() of getGroupsOfUserResource");
+				log.info("start POST doNextUser() doNextUserResource");
 				
-				 for (Parameter parameter : this.getRequest().getResourceRef().getQueryAsForm()) {
+				Form form = new Form(entity);
+				for (Parameter parameter : form) {
 			        	log.info("parameter " + parameter.getName());
 			   		  	log.info("/" + parameter.getValue());
 			        }	
-			    String external_user_id= this.getRequest().getResourceRef().getQueryAsForm().getFirstValue("p_external_user_id");;
-			    String fb_token=this.getRequest().getResourceRef().getQueryAsForm().getFirstValue("p_fb_token");;
+				String p_group_id = form.getFirstValue("p_group_id");
+				String p_external_user_id = form.getFirstValue("p_external_user_id");
+				String p_fb_token = form.getFirstValue("p_fb_token");
+			    String p_date = form.getFirstValue("p_date");
+			    Date currdate = new Date();
+				AChiToccaManager.doNextUser(p_group_id, p_external_user_id, p_fb_token, currdate, false);
 				
-			    //****Manage request				
-				ArrayList<Group> groupList = AChiToccaManager.getGroupsOfUser(external_user_id, fb_token);
-				
-				//***Manage result
-				ArrayList<GroupDto> dtoGroupList = new ArrayList<GroupDto>();
-				Iterator<Group> grpItr = groupList.iterator();
-				while (grpItr.hasNext()) {
-					Group g = grpItr.next();
-					GroupDto gDto = FactoryDto.groupDtoFromGroup(g);
-					dtoGroupList.add(gDto);
-				}
-				
-				MessageDto 	msgDto = new MessageDto();
-				msgDto.result="getGroupsOfUser completed!";
-				msgDto.code=0;
-				msgDto.detail=dtoGroupList;
+				MessageDto msgDto = new MessageDto();
 						
+				
+				msgDto.code=0;
+				msgDto.result="doNextUser completed!";
+				
 				
 				representation= new JsonRepresentation(msgDto);
 				representation.setIndenting(true);
@@ -76,7 +73,7 @@ public class getGroupsOfUserResource<K>  extends ServerResource {
 				JsonRepresentation errorRepresentation = new JsonRepresentation(error);
 				return errorRepresentation;
 			
-			}*/catch (NumberFormatException e_ne) {
+			}catch (NumberFormatException e_ne) {
 				e_ne.printStackTrace();
 				setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
 				ErrorResource error = new ErrorResource();
@@ -85,7 +82,7 @@ public class getGroupsOfUserResource<K>  extends ServerResource {
 				JsonRepresentation errorRepresentation = new JsonRepresentation(error);
 				return errorRepresentation;
 				
-			}/*catch (WrongParameterException e_wp) {
+			}catch (WrongParameterException e_wp) {
 				e_wp.printStackTrace();
 				setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
 				ErrorResource error = new ErrorResource();
@@ -99,14 +96,13 @@ public class getGroupsOfUserResource<K>  extends ServerResource {
 				ErrorResource error = new ErrorResource();
 				error.setErrorCode(ErrorResource.INTERNAL_SERVER_ERROR);
 				error.setErrorMessage(e.getMessage());
-				
 				JsonRepresentation errorRepresentation = new JsonRepresentation(error);
 				return errorRepresentation;
 				
 			}
 			
 			finally {
-				log.info("end GET getGroupsOfUser() of getGroupsOfUserResource");
+				log.info("end POST doNextUser() doNextUserResource");
 				
 			}
 			

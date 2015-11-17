@@ -4,22 +4,25 @@ import java.util.ArrayList;
 
 public class Turn {
 	private String groupId;
-	private ArrayList<ScheduledDay> scheduledDays;
+	private ArrayList<User> users;
 	private ArrayList<String> scheduledUsers;
 	private int nextUser;
 	
+	
+	
+	public ArrayList<User> getUsers() {
+		return users;
+	}
+	public void setUsers(ArrayList<User> users) {
+		this.users = users;
+	}
 	public String getGroupId() {
 		return groupId;
 	}
 	public void setGroupId(String groupId) {
 		this.groupId = groupId;
 	}
-	public ArrayList<ScheduledDay> getScheduledDays() {
-		return scheduledDays;
-	}
-	public void setScheduledDays(ArrayList<ScheduledDay> scheduledDays) {
-		this.scheduledDays = scheduledDays;
-	}
+	
 	public ArrayList<String> getScheduledUsers() {
 		return scheduledUsers;
 	}

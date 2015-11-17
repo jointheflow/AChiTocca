@@ -52,7 +52,10 @@ public class TurnFactory {
 		}
 		turn.setGroupId(groupId);
 		turn.setNextUser(0);
+		//set scehduled users
 		turn.setScheduledUsers(sUsers);
+		//set update users
+		turn.setUsers(users);
 		String msgTurn= new String();
 		
 		for (int j=0; j<turn.getScheduledUsers().size(); j++) {
@@ -144,5 +147,9 @@ public class TurnFactory {
 	    cal.set(Calendar.MILLISECOND, 0);  
 	    return cal.getTime(); 
 	}
+	
+	
+	
+	
 
 }

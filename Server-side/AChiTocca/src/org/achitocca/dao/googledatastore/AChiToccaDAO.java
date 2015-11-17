@@ -1,16 +1,14 @@
 package org.achitocca.dao.googledatastore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.achitocca.business.model.Group;
-import org.achitocca.business.model.ScheduledDay;
 import org.achitocca.business.model.Turn;
-import org.achitocca.business.model.TurnDefinition;
 import org.achitocca.business.model.User;
-import org.achitocca.rest.test.GroupTest;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -22,58 +20,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.datastore.AdminDatastoreService.KeyBuilder;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 public class AChiToccaDAO {
 	private static final Logger log = Logger.getLogger(AChiToccaDAO.class.getName());
-	
-	/*Add a new Turn. If a turn already exists new turn overwrite the old*/
-	public static void addOrUpdateTurn(String groupId, Turn aTurn) throws DAOException {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Transaction tx = datastore.beginTransaction();
-		try {
-			
-			//remove all (old) scheduled day for the group (the turn)
-			
-			Query ancestorQuery = new Query("ScheduledDay").setAncestor(KeyFactory.stringToKey(groupId)).setKeysOnly();
-			List<Entity> results = datastore.prepare(ancestorQuery).asList(FetchOptions.Builder.withDefaults());
-			for (Entity entity : results) {
-				log.info("Delete "+ entity.getKey().toString());
-				datastore.delete(entity.getKey());
-			}
-			
-			
-			//insert all new scheduled day of turn
-			Iterator<ScheduledDay> schItr = aTurn.getScheduledDays().iterator();
-			while (schItr.hasNext()) {
-				ScheduledDay sDay = schItr.next();
-				
-				Entity e_scheduledDay = new Entity("ScheduledDay",KeyFactory.stringToKey(groupId));
-				e_scheduledDay.setProperty("dayOfWeek",sDay.getDayOfWeek());
-				e_scheduledDay.setProperty("dayDate", sDay.getDayDate());
-				e_scheduledDay.setProperty("userId", sDay.getUserId());
-				
-				datastore.put(e_scheduledDay);
-			}
-			
-			
-			tx.commit();
-						
-		}catch (IllegalArgumentException e) {
-			log.info(e.getMessage());
-			throw new DAOException(e.getMessage());
-			
-		
-		} finally {
-		    if (tx.isActive()) {
-		        tx.rollback();
-		    }
-		}
-			
-	}    	
 	
 	/*create a new group  the group*/
 	public static Group createGroup(String externalGroupId, String name, String externalAdminId) throws DAOException {
@@ -87,7 +39,7 @@ public class AChiToccaDAO {
 			e_group.setProperty("name", name);
 			e_group.setProperty("externalAdminId", externalAdminId);
 			e_group.setProperty("nextUser", 0);
-			e_group.setProperty("turn", new ArrayList<String>());
+			e_group.setProperty("turn", new ArrayList<String>(Arrays.asList(externalAdminId)));
 			groupKey = datastore.put(e_group);
 			
 			//create the admin user and as first users
@@ -106,7 +58,7 @@ public class AChiToccaDAO {
 			group.setExternalGroupId(externalGroupId);
 			group.setGroupId(KeyFactory.keyToString(groupKey));
 			group.setAdmin(admin);
-			
+			group.setTurn((ArrayList<String>)e_group.getProperty("turn"));
 			
 			tx.commit();
 			return group;
@@ -129,7 +81,7 @@ public class AChiToccaDAO {
 	public static ArrayList<Group> getGroupOfUser(String externalUserId) throws DAOException {
 		ArrayList<Group> groupResult = new ArrayList<Group>();
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Transaction tx = datastore.beginTransaction();
+		//Transaction tx = datastore.beginTransaction();
 		try {
 			
 			//retrieves all user with externalUserId
@@ -149,13 +101,13 @@ public class AChiToccaDAO {
 				
 							
 				//retrieve group and add to the result
-				Group group = retrieveGroup(groupKey, datastore);
+				Group group = getGroup(groupKey);
 				groupResult.add(group);
 				
 			}
 			
 				
-			tx.commit();
+			//tx.commit();
 			return groupResult;
 						
 		}catch (IllegalArgumentException e) {
@@ -164,17 +116,18 @@ public class AChiToccaDAO {
 			
 		
 		} finally {
-		    if (tx.isActive()) {
+		    /*if (tx.isActive()) {
 		        tx.rollback();
-		    }
+		    }*/
 		    
 		}
 		
 		
 	}
 	/*retrieve a group basing on key*/
-	private static Group retrieveGroup(Key groupKey, DatastoreService datastore) throws DAOException {
-				
+	private static Group getGroup(Key groupKey) throws DAOException {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		//Transaction tx = datastore.beginTransaction();		
 		//get group
 		try {
 			Entity e_group = datastore.get(groupKey);
@@ -222,28 +175,25 @@ public class AChiToccaDAO {
 		Transaction tx = datastore.beginTransaction();
 		try {
 			
-			//retrieve the group by external id
+			Entity e_group = datastore.get(KeyFactory.stringToKey(groupId));
 			
-			/*Filter propertyFilter =
-					  new FilterPredicate("externalGropuId",
-					                      FilterOperator.EQUAL,
-					                      externalGropuId);
+			Key groupKey = e_group.getKey();
+			log.info("Found key "+ e_group.getKey().toString());
 			
-			Query q = new Query("Group").setFilter(propertyFilter).setKeysOnly();
-			PreparedQuery pq = datastore.prepare(q);*/
-			Entity entity = datastore.get(KeyFactory.stringToKey(groupId));
 			
-			Key groupKey = entity.getKey();
-			log.info("Found key "+ entity.getKey().toString());
+			//add users
+			Group g= getGroup(groupKey);
 			
-			Group g= retrieveGroup(groupKey, datastore);
+			ArrayList<String> usersInTurn = g.getTurn();
+			
 			//check if externalUserId already belong to the group
 			if (!g.userBelongToGroup(externalUserId)) throw new DAOException("User "+externalUserId+" cannot add users because he does not belong to group "+groupId);
 			
 			Iterator<String> usrItr = users.iterator();
 			while (usrItr.hasNext()) {
 				String usrStr = usrItr.next();
-				//add user only if not already exsists
+				
+				//add user to the users list and also to the current turn only if not already exsists
 				if (!g.userBelongToGroup(usrStr)) {
 					Entity e_user = new Entity("User", groupKey);
 					e_user.setProperty("externalUserId", usrStr);
@@ -253,10 +203,16 @@ public class AChiToccaDAO {
 					user.setExternalUserId(usrStr);
 					user.setUserId(KeyFactory.keyToString(userKey));
 					user.setTurnWeight(1);
+					//add users to turn
+					usersInTurn.add(usrStr);
 					
 					g.addUser(user);
 				}
 			}
+			
+			//update turn adding users
+			e_group.setProperty("turn", usersInTurn);
+			datastore.put(e_group);
 			
 			tx.commit();
 			return g;
@@ -284,6 +240,117 @@ public class AChiToccaDAO {
 		else
 			return (Integer) obj_val;
 					
+		
+	}
+	
+	/*Given a groupid get the turn model*/
+	public static Turn getTurn(String groupId) throws DAOException {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		//Transaction tx = datastore.beginTransaction();
+		try {
+			
+			Entity e_group = datastore.get(KeyFactory.stringToKey(groupId));
+			ArrayList<String> usersId = (ArrayList<String>) e_group.getProperty("turn");
+			
+			Turn turn = new Turn();
+			
+			turn.setGroupId(KeyFactory.keyToString(e_group.getKey()));
+			turn.setNextUser(castToInteger(e_group.getProperty("nextUser")));
+			turn.setScheduledUsers(usersId);
+			
+			
+			ArrayList<User> users = new ArrayList<User>();
+			//get every user references from group and set attributes
+			Iterator<String> usrItr = usersId.iterator();
+			while (usrItr.hasNext()) {
+				String extUserId = usrItr.next();
+			
+				//retrieves the user with externalUserId
+				Filter propertyFilter =
+						  new FilterPredicate("externalUserId",
+						                      FilterOperator.EQUAL,
+						                      extUserId);
+				
+				Query q = new Query("User").setFilter(propertyFilter).setAncestor(KeyFactory.stringToKey(groupId));
+				PreparedQuery pq = datastore.prepare(q);
+				Entity e_user = pq.asSingleEntity();
+				//create user model
+				User user = new User();
+				//set attributes from db
+				user.setExternalUserId(extUserId);
+				user.setUserId(KeyFactory.keyToString(e_user.getKey()));
+				user.setTurnWeight(castToInteger(e_user.getProperty("turnWeight")));
+				//add user
+				users.add(user);
+			}
+												
+			turn.setUsers(users);
+			
+			
+			log.info("Found turn for group"+ turn.getGroupId());
+				
+			//tx.commit();
+			return turn;
+			
+			
+				
+			
+						
+		}catch (IllegalArgumentException | EntityNotFoundException e) {
+			log.info(e.getMessage());
+			throw new DAOException(e.getMessage());
+			
+		
+		} finally {
+		    /*if (tx.isActive()) {
+		        tx.rollback();
+		    }*/
+		    
+		}
+		
+	}
+	
+	/*Update turn*/
+	public static void updateTurn(Turn turn) throws DAOException {
+		
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		Transaction tx = datastore.beginTransaction();
+		try {
+			
+			//get group reference and set turn attributes
+			Entity e_group = datastore.get(KeyFactory.stringToKey(turn.getGroupId()));
+			e_group.setProperty("nextUser", turn.getNextUser());
+			e_group.setProperty("turn", turn.getScheduledUsers());
+			datastore.put(e_group);
+			log.info("group updated:"+turn.getGroupId());
+			
+			//get every user references and set attributes
+			Iterator<User> usrItr = turn.getUsers().iterator();
+			while (usrItr.hasNext()) {
+				User u = usrItr.next();
+				log.info("Get user "+ u.getExternalUserId());
+				Entity e_user = datastore.get(KeyFactory.stringToKey(u.getUserId()));
+				e_user.setProperty("turnWeight", u.getTurnWeight());
+				datastore.put(e_user);
+				log.info("User updated:"+u.getExternalUserId());
+			}
+			
+						
+			tx.commit();
+			
+			
+		}catch (IllegalArgumentException | EntityNotFoundException e) {
+			log.info(e.getMessage());
+			throw new DAOException(e.getMessage());
+			
+		
+		} finally {
+		    if (tx.isActive()) {
+		        tx.rollback();
+		    }
+		}
+		   
+		
 		
 	}
 }
